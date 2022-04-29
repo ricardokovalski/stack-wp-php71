@@ -1,0 +1,42 @@
+version: "3.3"
+    
+services:
+  # MariaDB service
+  db:
+    build: ./.docker/db
+    container_name: ${LOCAL}_db
+    volumes:
+      - ./db:/var/lib/mysql
+    restart: always
+    ports:
+      - "3552:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: somewordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    networks:
+      - wordpress-php71-network
+
+  # Wordpress service
+  wordpress:
+    depends_on:
+      - db
+    build: ./.docker/wp
+    container_name: ${LOCAL}_wp
+    volumes:
+      - ./wp:/var/www/html
+    ports:
+      - "8380:80"
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    networks:
+      - wordpress-php71-network
+
+networks:
+  wordpress-php71-network:
+    driver: bridge
